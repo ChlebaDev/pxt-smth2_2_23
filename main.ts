@@ -1,45 +1,40 @@
-// Cíl: měření sprintu na kratší trati.
-// S:   tlačítkem spustit odpočet do startu - 5, 4, 3, 2, 1, teď, různé tóny
-//      => po odpočtu START
-// S:   -> zaznamenat skutečný start 
-// C:   -> zaznamenat doběhnutí, nějaká oslava "Budu pochválen"
-// S + C -> na obou branách zobrazení výsledků
+/*
+ Cíl: měření sprintu na kratší trati.
+ S:   tlačítkem spustit odpočet do startu - 5, 4, 3, 2, 1, teď, různé tóny
+ => po odpočtu START
+ S:   -> zaznamenat skutečný start
+ C:   -> zaznamenat doběhnutí, nějaká oslava "Budu pochválen"
+ S + C -> na obou branách zobrazení výsledků
+*/
 
-radio.setGroup(64)
-radio.setFrequencyBand(33)
+radio.setGroup(45)
+radio.setFrequencyBand(55)
 radio.setTransmitPower(7)
+radio.setTransmitSerialNumber(true)
+let mySerial = control.deviceSerialNumber()
 
-radio.setTransmitSerialNumber(true);
+let s = input.lightLevel()
 
-const mySerial = control.deviceSerialNumber();
-
-input.onButtonPressed(Button.B, function() {
+input.onButtonPressed(Button.B, function () {
     music.playTone(Note.CSharp3, music.beat(BeatFraction.Whole))
-
-    music.rest(music.beat(1000))
-
+    basic.showNumber(3)
+    
     music.playTone(Note.GSharp3, music.beat(BeatFraction.Whole))
-
-    music.rest(music.beat(1000))
+    basic.showNumber(2)
 
     music.playTone(Note.CSharp, music.beat(BeatFraction.Whole))
+    basic.showNumber(1)
+    basic.clearScreen()
 
-    music.rest(music.beat(1000))
-
-    music.playTone(Note.GSharp4, music.beat(5000))
+    music.playTone(Note.GSharp4, music.beat(7500)) // start
+    basic.showString("start")
 })
 
-let s = input.lightLevel();
-    
-if (s > 180) {
-//    console.logValue("Toto je light level", s + "\n\r");
-    radio.sendNumber(11);
+while (s > 180) { // jakmile závodník vyběhne, light level bude větší a pošle signál druhému mc:b který začne počítat čas, nejsem si jist přesnou hodnotou světla v osvícené místnosti
+    radio.sendNumber(11)
 }
 
-
-
-
-
-
-
-
+radio.onReceivedValue(function (name: string, value: number) {
+    music.playSoundEffect(music.builtinSoundEffect(soundExpression.happy), SoundExpressionPlayMode.UntilDone)
+    whaleysans.showNumber(value)
+})
